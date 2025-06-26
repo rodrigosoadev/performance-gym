@@ -15,7 +15,6 @@ const Header = () => {
   ];
 
   const menuItems = [
-    { label: 'Home', href: '/' },
     { 
       label: 'Modalidades', 
       href: '#modalidades',
@@ -126,8 +125,7 @@ const Header = () => {
                   <button
                     onClick={(e) => handleNavClick(item.href, e)}
                     className={`transition-colors duration-300 font-medium ${
-                      location.pathname === item.href || 
-                      (item.href === '/' && location.pathname === '/')
+                      location.pathname === item.href
                         ? 'text-[#5D9C31]' 
                         : 'text-gray-700 hover:text-[#5D9C31]'
                     }`}
@@ -138,9 +136,15 @@ const Header = () => {
               </div>
             ))}
             
-            <button className="bg-[#5D9C31] text-white px-6 py-2 rounded-lg hover:bg-[#4a7d28] transition-colors duration-300 font-medium">
-              Área do Aluno
-            </button>
+            <div className="flex items-center space-x-3">
+              <button className="bg-[#5D9C31] text-white px-6 py-2 rounded-lg hover:bg-[#4a7d28] transition-colors duration-300 font-medium">
+                Matricule-se
+              </button>
+              
+              <button className="border border-[#5D9C31] text-[#5D9C31] px-6 py-2 rounded-lg hover:bg-[#5D9C31]/10 transition-colors duration-300 font-medium">
+                Área do Aluno
+              </button>
+            </div>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -180,9 +184,16 @@ const Header = () => {
                   )}
                 </div>
               ))}
-              <button className="bg-[#5D9C31] text-white px-6 py-2 rounded-lg hover:bg-[#4a7d28] transition-colors duration-300 font-medium text-left">
-                Área do Aluno
-              </button>
+              
+              <div className="space-y-2 border-t pt-4">
+                <button className="bg-[#5D9C31] text-white px-6 py-2 rounded-lg hover:bg-[#4a7d28] transition-colors duration-300 font-medium w-full">
+                  Matricule-se
+                </button>
+                
+                <button className="border border-[#5D9C31] text-[#5D9C31] px-6 py-2 rounded-lg hover:bg-[#5D9C31]/10 transition-colors duration-300 font-medium w-full">
+                  Área do Aluno
+                </button>
+              </div>
             </nav>
           </div>
         )}

@@ -23,7 +23,7 @@ const FormularioAgendamento = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Formulário enviado:', formData);
-    //  formulário
+    // Aqui você pode implementar o envio do formulário
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

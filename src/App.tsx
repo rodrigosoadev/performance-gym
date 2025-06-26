@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Musculacao from "./pages/Musculacao";
 import Natacao from "./pages/Natacao";
 import Luta from "./pages/Luta";
+import Agendamento from "./pages/Agendamento";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,8 @@ const App = () => (
           <Route path="/musculacao" element={<Musculacao />} />
           <Route path="/natacao" element={<Natacao />} />
           <Route path="/luta" element={<Luta />} />
-          {/* Catch-all route for 404 Not Found */}
+          <Route path="/agendamento" element={<Agendamento />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

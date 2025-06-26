@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,64 +18,99 @@ const CalendarioInterativo = ({ modalidade, onDateSelect, selectedDate }: Calend
     'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
   ];
 
-  // Função para obter status FIXO do dia (sem aleatoriedade)
+  // Função para obter status com os novos indicadores visuais
   const getStatusDia = (date: Date) => {
     const dayOfWeek = date.getDay();
     const dayOfMonth = date.getDate();
     
     switch (modalidade) {
       case 'musculacao':
-        // Musculação: status baseado no dia do mês (consistente)
+        // Musculação: TODOS OS DIAS com horários amplos
         const modulo = dayOfMonth % 10;
-        if (modulo <= 2) return 'lotado';
-        if (modulo <= 5) return 'limitado';
-        return 'disponivel';
+        if (modulo <= 1) return 'lotado'; // 🔴 Lotado/Sem vagas
+        if (modulo <= 3) return 'poucas-vagas'; // 🟡 Poucas vagas disponíveis
+        return 'muitas-vagas'; // 🟢 Muitas vagas disponíveis
         
       case 'natacao':
         // Natação: apenas segunda a sexta
         if (dayOfWeek === 0 || dayOfWeek === 6) {
-          return 'indisponivel';
+          return 'sem-aulas'; // ⚪ Sem aulas programadas
         }
-        // Status baseado no dia do mês para consistência
         const moduloNat = dayOfMonth % 8;
         if (moduloNat <= 1) return 'lotado';
-        if (moduloNat <= 3) return 'limitado';
-        return 'disponivel';
+        if (moduloNat <= 3) return 'poucas-vagas';
+        return 'muitas-vagas';
         
       case 'luta':
         // Luta: sábado especial para defesa pessoal
         if (dayOfWeek === 6) {
-          return 'especial';
+          return 'especial'; // Aula especial
         }
-        // Domingo indisponível
+        // Domingo sem aulas
         if (dayOfWeek === 0) {
-          return 'indisponivel';
+          return 'sem-aulas';
         }
-        // Status baseado no dia do mês
         const moduloLuta = dayOfMonth % 7;
         if (moduloLuta <= 1) return 'lotado';
-        if (moduloLuta <= 3) return 'limitado';
-        return 'disponivel';
+        if (moduloLuta <= 3) return 'poucas-vagas';
+        return 'muitas-vagas';
         
       default:
-        return 'disponivel';
+        return 'muitas-vagas';
     }
   };
 
   const getCorStatus = (status: string) => {
     switch (status) {
-      case 'disponivel':
-        return 'bg-[#5D9C31] text-white hover:bg-[#4a7d28]';
-      case 'limitado':
-        return 'bg-[#FED54A] text-black hover:bg-[#fed843]';
+      case 'muitas-vagas':
+        return 'bg-[#5D9C31] text-white hover:bg-[#4a7d28] cursor-pointer'; // 🟢
+      case 'poucas-vagas':
+        return 'bg-[#FED54A] text-black hover:bg-[#fed843] cursor-pointer'; // 🟡
       case 'lotado':
-        return 'bg-[#BC1B18] text-white hover:bg-[#a01713]';
+        return 'bg-[#BC1B18] text-white hover:bg-[#a01713] cursor-pointer'; // 🔴
       case 'especial':
-        return 'bg-[#5EBB99] text-white hover:bg-[#4da88a]';
-      case 'indisponivel':
-        return 'bg-[#8DADAD] text-gray-600 cursor-not-allowed';
+        return 'bg-[#5EBB99] text-white hover:bg-[#4da88a] cursor-pointer';
+      case 'sem-aulas':
+        return 'bg-gray-100 text-gray-400 cursor-default'; // ⚪
+      case 'passado':
+        return 'bg-gray-50 text-gray-300 cursor-not-allowed';
       default:
         return 'bg-gray-100 text-gray-500';
+    }
+  };
+
+  const getIndicadorEmoji = (status: string) => {
+    switch (status) {
+      case 'muitas-vagas':
+        return '🟢';
+      case 'poucas-vagas':
+        return '🟡';
+      case 'lotado':
+        return '🔴';
+      case 'especial':
+        return '⭐';
+      case 'sem-aulas':
+        return '⚪';
+      default:
+        return '';
+    }
+  };
+
+  const getTooltipText = (status: string, date: Date) => {
+    const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    switch (status) {
+      case 'muitas-vagas':
+        return `${dateStr}: Muitas vagas disponíveis`;
+      case 'poucas-vagas':
+        return `${dateStr}: Poucas vagas disponíveis`;
+      case 'lotado':
+        return `${dateStr}: Lotado/Sem vagas`;
+      case 'especial':
+        return `${dateStr}: Aula especial`;
+      case 'sem-aulas':
+        return `${dateStr}: Sem aulas programadas`;
+      default:
+        return dateStr;
     }
   };
 
@@ -109,15 +145,12 @@ const CalendarioInterativo = ({ modalidade, onDateSelect, selectedDate }: Calend
     return dias;
   };
 
-  // LIMITAÇÃO: Só permitir navegação no mês atual
   const navegarMes = (direcao: number) => {
     const novoMes = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direcao, 1);
     const hoje = new Date();
     const mesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     
-    // Só permite navegar se for o mês atual ou anterior
     if (direcao > 0) {
-      // Tentando ir para o futuro - bloquear
       if (novoMes.getTime() > mesAtual.getTime()) {
         console.log('Agendamentos limitados ao mês atual');
         return;
@@ -127,7 +160,6 @@ const CalendarioInterativo = ({ modalidade, onDateSelect, selectedDate }: Calend
     setCurrentMonth(novoMes);
   };
 
-  // Verificar se pode navegar para o próximo mês
   const podeAvancarMes = () => {
     const proximoMes = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
     const hoje = new Date();
@@ -144,7 +176,7 @@ const CalendarioInterativo = ({ modalidade, onDateSelect, selectedDate }: Calend
 
   return (
     <div className="bg-gray-50 rounded-md p-3">
-      {/* Header do calendário compacto */}
+      {/* Header do calendário */}
       <div className="flex items-center justify-between mb-3">
         <Button
           variant="outline"
@@ -170,7 +202,7 @@ const CalendarioInterativo = ({ modalidade, onDateSelect, selectedDate }: Calend
         </Button>
       </div>
 
-      {/* Dias da semana compactos */}
+      {/* Dias da semana */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {diasSemana.map((dia) => (
           <div key={dia} className="text-center text-xs font-medium text-gray-600 p-1">
@@ -179,52 +211,67 @@ const CalendarioInterativo = ({ modalidade, onDateSelect, selectedDate }: Calend
         ))}
       </div>
 
-      {/* Grid do calendário compacto */}
+      {/* Grid do calendário */}
       <div className="grid grid-cols-7 gap-1 mb-3">
         {gerarCalendario().map((item, index) => (
-          <div key={index} className="aspect-square">
+          <div key={index} className="aspect-square relative">
             {item && (
               <button
                 onClick={() => {
-                  if (item.status !== 'indisponivel' && item.status !== 'passado') {
+                  if (item.status !== 'sem-aulas' && item.status !== 'passado') {
                     onDateSelect(item.date);
                   }
                 }}
-                disabled={item.status === 'indisponivel' || item.status === 'passado'}
+                disabled={item.status === 'sem-aulas' || item.status === 'passado'}
+                title={getTooltipText(item.status, item.date)}
                 className={`
-                  w-full h-full rounded text-xs font-medium transition-all duration-200
+                  w-full h-full rounded text-xs font-medium transition-all duration-200 relative
                   ${getCorStatus(item.status)}
                   ${isSelected(item.date) ? 'ring-2 ring-[#5D9C31] ring-offset-1' : ''}
-                  ${item.status === 'passado' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}
                 `}
               >
-                {item.date.getDate()}
+                <span className="relative z-10">{item.date.getDate()}</span>
+                {/* Indicador visual no canto */}
+                <div className="absolute top-0 right-0 text-[8px] leading-none">
+                  {getIndicadorEmoji(item.status)}
+                </div>
               </button>
             )}
           </div>
         ))}
       </div>
 
-      {/* Legenda compacta */}
+      {/* Legenda atualizada com novos indicadores */}
       <div className="grid grid-cols-2 gap-1 text-xs">
         <div className="flex items-center">
           <div className="w-2 h-2 bg-[#5D9C31] rounded mr-1"></div>
-          <span>Disponível</span>
+          <span>🟢 Muitas vagas</span>
         </div>
         <div className="flex items-center">
           <div className="w-2 h-2 bg-[#FED54A] rounded mr-1"></div>
-          <span>Limitado</span>
+          <span>🟡 Poucas vagas</span>
         </div>
         <div className="flex items-center">
           <div className="w-2 h-2 bg-[#BC1B18] rounded mr-1"></div>
-          <span>Lotado</span>
+          <span>🔴 Lotado</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-2 h-2 bg-gray-100 border border-gray-300 rounded mr-1"></div>
+          <span>⚪ Sem aulas</span>
         </div>
         {modalidade === 'luta' && (
-          <div className="flex items-center">
+          <div className="flex items-center col-span-2">
             <div className="w-2 h-2 bg-[#5EBB99] rounded mr-1"></div>
-            <span>Especial</span>
+            <span>⭐ Especial</span>
           </div>
         )}
+      </div>
+      
+      {/* Dica de interação */}
+      <div className="mt-2 text-center">
+        <p className="text-xs text-gray-500">
+          💡 Clique na data para ver horários
+        </p>
       </div>
     </div>
   );
